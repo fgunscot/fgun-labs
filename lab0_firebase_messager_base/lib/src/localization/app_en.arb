@@ -1,0 +1,6 @@
+{
+  "appTitle": "lab0_firebase_messager_base",
+  "@appTitle": {
+    "description": "The title of the application"
+  }
+}
