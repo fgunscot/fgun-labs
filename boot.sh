@@ -7,8 +7,8 @@
 
 #create flutter project
 flutter create -t skeleton $1
-
 sudo rm -rf ./$1/lib ./$1/test
+
 # copy over custom bootstrap
 cp -R ./templates/{EDITME}_template/lib/ ./templates/{EDITME}_template/test/ ./$1
 

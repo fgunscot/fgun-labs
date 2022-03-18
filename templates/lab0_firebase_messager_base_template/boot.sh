@@ -1,5 +1,14 @@
 #!/bin/sh
+
+#
+#   To use template, from ./fgun-labs:
+#       - ./templates/[lab*_to_template_to_use]/boot.sh [lab*_to_new_flutter_project]
+#
+
+#create flutter project
+flutter create -t skeleton $1
 sudo rm -rf ./$1/lib ./$1/test
+
 # copy over custom bootstrap
 cp -R ./templates/lab0_firebase_messager_base_template/lib/ ./templates/lab0_firebase_messager_base_template/test/ ./$1
 
