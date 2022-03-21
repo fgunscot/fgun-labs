@@ -3,42 +3,35 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lab1_provider_messager/src/chat/chat_service.dart';
 import 'package:lab1_provider_messager/src/chat/chat_view.dart';
 import 'package:lab1_provider_messager/src/chat/chat_controller.dart';
+import 'package:provider/provider.dart';
+
+List<MessageModel> messages = [
+  MessageModel('this is the first message'),
+  MessageModel('this is the Secound'),
+  MessageModel('Third message'),
+  MessageModel('fourth')
+];
 
 void main() {
   group('For ChatView(), Check right keys are present - -', () {
-    late List<MessageModel> messages;
-    late ChatController fullController;
-    late ChatController emptyController;
-    setUp(() {
-      messages = [
-        MessageModel('this is the first message'),
-        MessageModel('this is the Secound'),
-        MessageModel('Third message'),
-        MessageModel('fourth')
-      ];
-      fullController =
-          ChatController(ChatModel(name: 'steve', messages: messages));
-      emptyController = ChatController(ChatModel(name: 'steve', messages: []));
-    });
+    ChatModel fullModel = ChatModel(name: 'steve', messages: messages);
+    ChatModel emptyModel = ChatModel(name: 'steve', messages: []);
 
-    Future<void> _buildChatView(WidgetTester tester,
-        [ChatController? controller]) async {
+    Future<void> _buildChatView(WidgetTester tester, ChatModel model) async {
       await tester.pumpWidget(
-        MaterialApp(home: ChatView(controller: controller ?? emptyController)),
+        ChangeNotifierProvider<ChatController>(
+          create: (context) => ChatController(model),
+          child: const ChatView(),
+        ),
       );
     }
 
-    Finder _getTextFieldKeyByName(String name) =>
-        find.byKey(Key('chatViewTextInput$name'));
-    Finder _getButtonKeyByName(String name) =>
-        find.byKey(Key('chatViewButtonInput$name'));
-
-    testWidgets('-> check input feilds have the right name',
-        (WidgetTester tester) async {
-      await _buildChatView(tester);
-      expect(find.byKey(const Key('chatViewTextInputsteve')), findsOneWidget);
-      expect(find.byKey(const Key('chatViewButtonInputsteve')), findsOneWidget);
-    });
+    // testWidgets('-> check input feilds have the right name',
+    //     (WidgetTester tester) async {
+    //   await _buildChatView(tester, fullModel);
+    //   expect(find.byKey(const Key('chatViewTextInputsteve')), findsOneWidget);
+    //   expect(find.byKey(const Key('chatViewButtonInputsteve')), findsOneWidget);
+    // });
 
     testWidgets('-> send message', (WidgetTester tester) async {});
 
@@ -56,12 +49,12 @@ void main() {
     //   // expect(_getTextFieldKeyByName('steve').evaluate(), isEmpty);
     // });
 
-    testWidgets('-> list is showing 4 messages', (WidgetTester tester) async {
-      await _buildChatView(tester, fullController);
-    });
+    // testWidgets('-> list is showing 4 messages', (WidgetTester tester) async {
+    //   await _buildChatView(tester, fullModel);
+    // });
 
-    testWidgets('-> list is showing 0 messages', (WidgetTester tester) async {
-      await _buildChatView(tester, emptyController);
-    });
+    // testWidgets('-> list is showing 0 messages', (WidgetTester tester) async {
+    //   await _buildChatView(tester, emptyModel);
+    // });
   });
 }

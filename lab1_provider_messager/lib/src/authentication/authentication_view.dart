@@ -10,13 +10,12 @@ class RegisterForm extends StatefulWidget {
   const RegisterForm({
     Key? key,
     required this.registerWithPassword,
-    required this.controller,
-    // required this.changeAuthViewState,
+    required this.updateAuthState,
   }) : super(key: key);
 
+  final void Function(AuthViewStates state) updateAuthState;
   final void Function(String name, String email, String password)
       registerWithPassword;
-  final AuthenticationController controller;
 
   static const registerFormSendButtonKey = Key('registerFormSendButton');
 
@@ -105,7 +104,7 @@ class _RegisterFormState extends State<RegisterForm> {
                 key: AuthenticationView.authSwitchFormsButtonKey,
                 child: const Text('Sign in here!'),
                 onPressed: () =>
-                    widget.controller.authState = AuthViewStates.signInView,
+                    widget.updateAuthState(AuthViewStates.signInView),
               ),
             ],
           ).padTop(8.0),
@@ -119,13 +118,11 @@ class SignInForm extends StatefulWidget {
   const SignInForm({
     Key? key,
     required this.signInWithPassword,
-    // required this.changeAuthViewState,
-    required this.controller,
+    required this.updateAuthState,
   }) : super(key: key);
 
   final void Function(String email, String password) signInWithPassword;
-  // final void Function(AuthViewStates state) changeAuthViewState;
-  final AuthenticationController controller;
+  final void Function(AuthViewStates state) updateAuthState;
 
   static const signInFormSendButtonKey = Key('signInFormSendButton');
 
@@ -202,7 +199,7 @@ class _SignInFormState extends State<SignInForm> {
                 key: AuthenticationView.authSwitchFormsButtonKey,
                 child: const Text('Sign in here!'),
                 onPressed: () =>
-                    widget.controller.authState = AuthViewStates.registerView,
+                    widget.updateAuthState(AuthViewStates.registerView),
               ),
             ],
           ).padTop(8.0),
@@ -215,12 +212,23 @@ class _SignInFormState extends State<SignInForm> {
 // class AuthenticationView extends StatefulWidget {
 class AuthenticationView extends StatelessWidget {
   static const routeName = '/authentication';
-  const AuthenticationView({
-    Key? key,
-    required this.controller,
-  }) : super(key: key);
-
-  final AuthenticationController controller;
+  const AuthenticationView(
+      {Key? key,
+      required this.authState,
+      required this.updateAuthState,
+      required this.signInWithPassword,
+      required this.registerWithPassword,
+      required this.signOut})
+      : super(key: key);
+  final AuthViewStates authState;
+  final void Function(AuthViewStates) updateAuthState;
+  // final AuthViewStates updateAuthState;
+  final void Function(String, String, void Function(FirebaseAuthException e))
+      signInWithPassword;
+  final void Function(
+          String, String, String, void Function(FirebaseAuthException e))
+      registerWithPassword;
+  final void Function() signOut;
 
   // button keys
   static const authCancelButtonKey = Key('authCancelButton');
@@ -243,30 +251,27 @@ class AuthenticationView extends StatelessWidget {
         child: SizedBox(
           height: double.infinity,
           width: 380,
-          child: AnimatedBuilder(
-            animation: controller,
-            builder: (context, child) {
-              switch (controller.authState) {
+          child: Builder(
+            builder: (context) {
+              switch (authState) {
                 case AuthViewStates.signInView:
                   return SignInForm(
                       signInWithPassword: (email, password) =>
-                          controller.signInWithPassword(email, password,
+                          signInWithPassword(email, password,
                               (e) => _showAlertDialog(context, e)),
-                      controller: controller);
+                      updateAuthState: updateAuthState);
                 case AuthViewStates.registerView:
                   return RegisterForm(
                       registerWithPassword: (name, email, password) =>
-                          controller.registerWithPassword(name, email, password,
+                          registerWithPassword(name, email, password,
                               (e) => _showAlertDialog(context, e)),
-                      controller: controller);
+                      updateAuthState: updateAuthState);
                 case AuthViewStates.authComplete:
                   return Center(
                       child: IconButton(
-                    icon: const Icon(Icons.abc_rounded),
-                    onPressed: () => controller.logOutCurrentUser(),
-                  ));
+                          icon: const Icon(Icons.abc_rounded),
+                          onPressed: signOut));
               }
-              return const CircularProgressIndicator();
             },
           ),
         ),

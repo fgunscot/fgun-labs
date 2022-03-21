@@ -20,11 +20,6 @@ class MessagerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    MessagerController messagerController = MessagerController(chat: [
-      ChatModel(name: 'steven', messages: []),
-      ChatModel(name: 'jeff', messages: []),
-      ChatModel(name: 'james', messages: [])
-    ]);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       restorationScopeId: 'app',
@@ -64,18 +59,28 @@ class MessagerApp extends StatelessWidget {
 
               case AuthenticationView.routeName:
                 return Consumer<AuthenticationController>(
-                    builder: (_, controller, __) =>
-                        AuthenticationView(controller: controller));
+                    builder: (_, controller, __) => AuthenticationView(
+                        authState: controller.authState,
+                        updateAuthState: controller.updateAuthState,
+                        registerWithPassword: controller.registerWithPassword,
+                        signInWithPassword: controller.signInWithPassword,
+                        signOut: controller.logOutCurrentUser));
 
+              /*
+              *     should do some testing into the notifier here, check if it's 
+              *     being disposed, or else this could cause memory leaks.
+              */
               case ChatView.routeName:
                 final args = routeSettings.arguments as int;
-                final chatController =
-                    ChatController(messagerController.getChat(args));
-                return ChatView(controller: chatController);
+                final chat = context.watch<MessagerController>().getChat(args);
+                return ChangeNotifierProvider<ChatController>(
+                    create: (context) => ChatController(chat),
+                    child: const ChatView());
 
               case MessagerView.routeName:
               default:
-                return MessagerView(controller: messagerController);
+                return MessagerView(
+                    chats: context.watch<MessagerController>().chats);
             }
           },
         );
@@ -90,16 +95,16 @@ class MyApp extends StatelessWidget {
     Key? key,
     required this.settingsController,
   }) : super(key: key);
-
-  /*
-  *     might still want to init settings controller, as per reasoning in main
-  *     for now ill init here but should change to an update. 
-  */
-
   final SettingsController settingsController;
 
   @override
   Widget build(BuildContext context) {
+    MessagerController messagerController = MessagerController(chat: [
+      ChatModel(name: 'steven', messages: []),
+      ChatModel(name: 'jeff', messages: []),
+      ChatModel(name: 'james', messages: [])
+    ]);
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<SettingsController>.value(
@@ -107,6 +112,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<AuthenticationController>(
             create: (context) =>
                 AuthenticationController(AuthenticationService())),
+        ChangeNotifierProvider<MessagerController>.value(
+            value: messagerController),
       ],
       child: const MessagerApp(),
     );

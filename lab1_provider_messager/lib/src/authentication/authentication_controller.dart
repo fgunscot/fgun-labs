@@ -10,16 +10,17 @@ class AuthenticationController with ChangeNotifier {
   }
 
   AuthViewStates _authState = AuthViewStates.signInView;
-  set authState(AuthViewStates state) {
+  AuthViewStates get authState => _authState;
+  void updateAuthState(AuthViewStates state) {
     _authState = state;
     notifyListeners();
   }
 
-  AuthViewStates get authState => _authState;
-
   final AuthenticationService authService;
+
   UserModel? _userModel;
-  UserModel? get userModel => _userModel;
+  get userModel => _userModel;
+  set userModel(model) => _userModel = model;
 
   void signInWithPassword(String email, String password,
       void Function(FirebaseAuthException e) errorCallback) {
@@ -45,9 +46,9 @@ class AuthenticationController with ChangeNotifier {
   void onUserModelChanged(UserModel? model) {
     _userModel = model;
     if (model != null) {
-      authState = AuthViewStates.authComplete;
+      _authState = AuthViewStates.authComplete;
     } else {
-      authState = AuthViewStates.signInView;
+      _authState = AuthViewStates.signInView;
     }
     notifyListeners();
   }

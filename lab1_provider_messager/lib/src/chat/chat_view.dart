@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lab1_provider_messager/src/chat/chat_controller.dart';
 import 'package:lab1_provider_messager/src/chat/chat_service.dart';
+import 'package:provider/provider.dart';
 
 class MessageView extends StatelessWidget {
   const MessageView({
@@ -55,8 +56,7 @@ class MessageView extends StatelessWidget {
 
 class ChatView extends StatelessWidget {
   static const routeName = '/chat';
-  const ChatView({Key? key, required this.controller}) : super(key: key);
-  final ChatController controller;
+  const ChatView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -69,16 +69,18 @@ class ChatView extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: ListView.builder(
-                reverse: true,
-                itemCount: controller.messages.length,
-                itemBuilder: (context, index) {
-                  bool _isMe = controller.isMe;
-                  return MessageView(
-                    isMe: _isMe,
-                    model: controller.messages[index],
-                  );
-                },
+              child: Consumer<ChatController>(
+                builder: (_, controller, __) => ListView.builder(
+                  reverse: true,
+                  itemCount: controller.messages.length,
+                  itemBuilder: (context, index) {
+                    bool _isMe = controller.isMe;
+                    return MessageView(
+                      isMe: _isMe,
+                      model: controller.messages[index],
+                    );
+                  },
+                ),
               ),
             ),
           ),
@@ -86,27 +88,29 @@ class ChatView extends StatelessWidget {
           SizedBox(
             height: 60.0,
             width: double.maxFinite,
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: TextField(
-                      key: Key('chatViewTextInput${controller.getName}'),
-                      controller: _inputController,
+            child: Consumer<ChatController>(
+              builder: (_, controller, __) => Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: TextField(
+                        key: Key('chatViewTextInput${controller.getName}'),
+                        controller: _inputController,
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  key: Key('chatViewButtonInput${controller.getName}'),
-                  onPressed: () {
-                    controller.sendMessage(_inputController.text);
-                    _inputController.clear();
-                  },
-                  icon: const Icon(Icons.send),
-                )
-              ],
+                  IconButton(
+                    key: Key('chatViewButtonInput${controller.getName}'),
+                    onPressed: () {
+                      controller.sendMessage(_inputController.text);
+                      _inputController.clear();
+                    },
+                    icon: const Icon(Icons.send),
+                  )
+                ],
+              ),
             ),
           )
         ],

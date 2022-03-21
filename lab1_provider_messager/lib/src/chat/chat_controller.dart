@@ -1,8 +1,9 @@
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:lab1_provider_messager/src/chat/chat_service.dart';
 
-class ChatController {
+class ChatController with ChangeNotifier {
   ChatController(this.model);
   ChatModel model;
 
@@ -12,5 +13,8 @@ class ChatController {
 
   get messages => model.messages;
 
-  sendMessage(String message) => print('sending message: $message');
+  sendMessage(String message) {
+    model.messages.add(MessageModel(message));
+    notifyListeners();
+  }
 }

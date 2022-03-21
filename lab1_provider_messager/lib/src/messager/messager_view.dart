@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:lab1_provider_messager/src/authentication/authentication_view.dart';
 import 'package:lab1_provider_messager/src/chat/chat_service.dart';
 import 'package:lab1_provider_messager/src/chat/chat_view.dart';
-import 'package:lab1_provider_messager/src/messager/messager_controller.dart';
 import 'package:lab1_provider_messager/src/widgets/drawer/drawer_view.dart';
 
 class ChatTile extends StatelessWidget {
@@ -31,9 +30,10 @@ class ChatTile extends StatelessWidget {
 
 class MessagerView extends StatelessWidget {
   static const routeName = '/messager';
-  const MessagerView({Key? key, required this.controller}) : super(key: key);
+  const MessagerView({Key? key, required this.chats}) : super(key: key);
 
-  final MessagerController controller;
+  final List<ChatModel> chats;
+
   static const navToAuthIconButtonKey = Key('navToAuthIconButton');
 
   @override
@@ -53,11 +53,11 @@ class MessagerView extends StatelessWidget {
         ],
       ),
       drawer: const DrawerView(),
-      body: controller.chats.isNotEmpty
+      body: chats.isNotEmpty
           ? ListView.builder(
-              itemCount: controller.chats.length,
-              itemBuilder: (context, index) => ChatTile(
-                  chatName: controller.chats[index].name, index: index),
+              itemCount: chats.length,
+              itemBuilder: (context, index) =>
+                  ChatTile(chatName: chats[index].name, index: index),
             )
           : const Center(child: Text('You dont have anyone to chat with.')),
     );
