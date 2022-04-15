@@ -18,10 +18,6 @@ class AuthenticationController with ChangeNotifier {
 
   final AuthenticationService authService;
 
-  UserModel? _userModel;
-  get userModel => _userModel;
-  set userModel(model) => _userModel = model;
-
   void signInWithPassword(String email, String password,
       void Function(FirebaseAuthException e) errorCallback) {
     var model = AuthenticationModel(email: email, password: password);
@@ -43,9 +39,8 @@ class AuthenticationController with ChangeNotifier {
 
   void logOutCurrentUser() => authService.logOutCurrentUser();
 
-  void onUserModelChanged(UserModel? model) {
-    _userModel = model;
-    if (model != null) {
+  void onUserModelChanged(bool model) {
+    if (model) {
       _authState = AuthViewStates.authComplete;
     } else {
       _authState = AuthViewStates.signInView;

@@ -11,10 +11,9 @@ class AuthenticationService {
   Future<void> init() async {
     FirebaseAuth.instance.userChanges().listen((user) {
       if (user != null) {
-        controller!.onUserModelChanged(
-            UserModel(displayName: user.displayName, email: user.email));
+        controller!.onUserModelChanged(true);
       } else {
-        controller!.onUserModelChanged(null);
+        controller!.onUserModelChanged(false);
       }
     });
   }
@@ -48,24 +47,6 @@ class AuthenticationService {
   void logOutCurrentUser() async {
     FirebaseAuth.instance.signOut();
   }
-}
-
-class UserModel {
-  UserModel({
-    required this.displayName,
-    required this.email,
-  });
-  String? displayName;
-  String? email;
-
-  UserModel.fromJson(Map<String, dynamic> json)
-      : displayName = json['display_name']!,
-        email = json['email']!;
-
-  Map<String, dynamic> toJson() => {
-        'display_name': displayName,
-        'email': email,
-      };
 }
 
 class AuthenticationModel {

@@ -5,6 +5,7 @@ import 'package:lab1_provider_messager/src/utils/form_validators.dart';
 import 'package:lab1_provider_messager/src/utils/pad_items.dart';
 import 'package:lab1_provider_messager/src/utils/button_styles.dart';
 import 'package:lab1_provider_messager/src/widgets/dialogs/alert_dialog.dart';
+import 'package:provider/provider.dart';
 
 class RegisterForm extends StatefulWidget {
   const RegisterForm({
@@ -212,23 +213,7 @@ class _SignInFormState extends State<SignInForm> {
 // class AuthenticationView extends StatefulWidget {
 class AuthenticationView extends StatelessWidget {
   static const routeName = '/authentication';
-  const AuthenticationView(
-      {Key? key,
-      required this.authState,
-      required this.updateAuthState,
-      required this.signInWithPassword,
-      required this.registerWithPassword,
-      required this.signOut})
-      : super(key: key);
-  final AuthViewStates authState;
-  final void Function(AuthViewStates) updateAuthState;
-  // final AuthViewStates updateAuthState;
-  final void Function(String, String, void Function(FirebaseAuthException e))
-      signInWithPassword;
-  final void Function(
-          String, String, String, void Function(FirebaseAuthException e))
-      registerWithPassword;
-  final void Function() signOut;
+  const AuthenticationView({Key? key}) : super(key: key);
 
   // button keys
   static const authCancelButtonKey = Key('authCancelButton');
@@ -251,26 +236,26 @@ class AuthenticationView extends StatelessWidget {
         child: SizedBox(
           height: double.infinity,
           width: 380,
-          child: Builder(
-            builder: (context) {
-              switch (authState) {
+          child: Consumer<AuthenticationController>(
+            builder: (_, controller, __) {
+              switch (controller.authState) {
                 case AuthViewStates.signInView:
                   return SignInForm(
                       signInWithPassword: (email, password) =>
-                          signInWithPassword(email, password,
+                          controller.signInWithPassword(email, password,
                               (e) => _showAlertDialog(context, e)),
-                      updateAuthState: updateAuthState);
+                      updateAuthState: controller.updateAuthState);
                 case AuthViewStates.registerView:
                   return RegisterForm(
                       registerWithPassword: (name, email, password) =>
-                          registerWithPassword(name, email, password,
+                          controller.registerWithPassword(name, email, password,
                               (e) => _showAlertDialog(context, e)),
-                      updateAuthState: updateAuthState);
+                      updateAuthState: controller.updateAuthState);
                 case AuthViewStates.authComplete:
                   return Center(
                       child: IconButton(
                           icon: const Icon(Icons.abc_rounded),
-                          onPressed: signOut));
+                          onPressed: () => controller.logOutCurrentUser()));
               }
             },
           ),
