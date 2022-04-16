@@ -5,8 +5,6 @@ import 'package:lab1_provider_messager/src/authentication/authentication_service
 
 import 'package:lab1_provider_messager/src/authentication/authentication_view.dart';
 import 'package:lab1_provider_messager/src/authentication/authentication_controller.dart';
-import 'package:lab1_provider_messager/src/chat/chat_controller.dart';
-import 'package:lab1_provider_messager/src/chat/chat_service.dart';
 import 'package:lab1_provider_messager/src/chat/chat_view.dart';
 import 'package:lab1_provider_messager/src/messager/messager_controller.dart';
 import 'package:lab1_provider_messager/src/messager/messager_service.dart';
@@ -43,10 +41,7 @@ class MessagerApp extends StatelessWidget {
 
               case ChatView.routeName:
                 final args = routeSettings.arguments as String;
-                final chat = context.watch<MessagerController>().getChat(args);
-                return ChangeNotifierProvider<ChatController>(
-                    create: (context) => ChatController(chat),
-                    child: const ChatView());
+                return ChatView(chatId: args);
 
               case MessagerView.routeName:
               default:

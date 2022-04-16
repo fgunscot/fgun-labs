@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:lab1_provider_messager/src/chat/chat_service.dart';
 import 'package:lab1_provider_messager/src/messager/messager_service.dart';
 
 class MessagerController with ChangeNotifier {
@@ -8,8 +7,8 @@ class MessagerController with ChangeNotifier {
   }
   late MessagerService service;
 
-  late UserModel _userModel;
-  UserModel getUserModel() => _userModel;
+  UserModel? _userModel;
+  UserModel? getUserModel() => _userModel;
   setUserModel(UserModel model) {
     _userModel = model;
     notifyListeners();
@@ -23,11 +22,15 @@ class MessagerController with ChangeNotifier {
   }
 
   startChat(String id) => service.startChat(id);
-
   Map<String, ChatModel> _chats = {};
   Map<String, ChatModel> getChats() => _chats;
-
-  ChatModel getChat(String id) {
-    return _chats[id]!;
+  setChats(Map<String, ChatModel> models) {
+    _chats = models;
+    notifyListeners();
   }
+
+  ChatModel getChat(String id) => _chats[id]!;
+
+  void sendMessage(String id, String message) => service.sendMessage(
+      id, MessageModel(message: message, senderId: service.myUserId));
 }

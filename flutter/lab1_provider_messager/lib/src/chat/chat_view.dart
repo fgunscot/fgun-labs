@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:lab1_provider_messager/src/chat/chat_controller.dart';
-import 'package:lab1_provider_messager/src/chat/chat_service.dart';
+import 'package:lab1_provider_messager/src/messager/messager_controller.dart';
+import 'package:lab1_provider_messager/src/messager/messager_service.dart';
 import 'package:provider/provider.dart';
 
 class MessageView extends StatelessWidget {
   const MessageView({
     Key? key,
-    required this.isMe,
     required this.model,
   }) : super(key: key);
-  final bool isMe;
   final MessageModel model;
+
   @override
   Widget build(BuildContext context) {
     var _rad = const Radius.circular(16.0);
@@ -19,12 +18,12 @@ class MessageView extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Column(
         crossAxisAlignment:
-            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            model.isMe! ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Container(
             decoration: BoxDecoration(
-              color: isMe ? Colors.deepPurple[300] : Colors.grey[500],
-              borderRadius: isMe
+              color: model.isMe! ? Colors.deepPurple[300] : Colors.grey[500],
+              borderRadius: model.isMe!
                   ? BorderRadius.only(
                       topLeft: _rad, topRight: _rad, bottomLeft: _rad)
                   : BorderRadius.only(
@@ -56,7 +55,8 @@ class MessageView extends StatelessWidget {
 
 class ChatView extends StatelessWidget {
   static const routeName = '/chat';
-  const ChatView({Key? key}) : super(key: key);
+  const ChatView({Key? key, required this.chatId}) : super(key: key);
+  final String chatId;
 
   @override
   Widget build(BuildContext context) {
@@ -69,48 +69,44 @@ class ChatView extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: Consumer<ChatController>(
-                builder: (_, controller, __) => ListView.builder(
-                  reverse: true,
-                  itemCount: controller.messages.length,
-                  itemBuilder: (context, index) {
-                    bool _isMe = controller.isMe;
-                    return MessageView(
-                      isMe: _isMe,
-                      model: controller.messages[index],
-                    );
-                  },
-                ),
-              ),
+              child: Consumer<MessagerController>(builder: (_, controller, __) {
+                var chat = controller.getChat(chatId);
+                return chat.messages.isNotEmpty
+                    ? ListView.builder(
+                        reverse: true,
+                        itemCount: chat.messages.length,
+                        itemBuilder: (context, index) {
+                          return MessageView(model: chat.messages[index]);
+                        },
+                      )
+                    : const CircularProgressIndicator();
+              }),
             ),
           ),
           const Divider(height: 2, thickness: 2),
           SizedBox(
             height: 60.0,
             width: double.maxFinite,
-            child: Consumer<ChatController>(
-              builder: (_, controller, __) => Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: TextField(
-                        key: Key('chatViewTextInput${controller.getName}'),
-                        controller: _inputController,
-                      ),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: TextField(
+                      controller: _inputController,
                     ),
                   ),
-                  IconButton(
-                    key: Key('chatViewButtonInput${controller.getName}'),
-                    onPressed: () {
-                      controller.sendMessage(_inputController.text);
-                      _inputController.clear();
-                    },
-                    icon: const Icon(Icons.send),
-                  )
-                ],
-              ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    Provider.of<MessagerController>(context, listen: false)
+                        .sendMessage(chatId, _inputController.text);
+                    _inputController.clear();
+                  },
+                  icon: const Icon(Icons.send),
+                )
+              ],
             ),
           )
         ],

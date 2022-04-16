@@ -8,21 +8,24 @@ class ChatTile extends StatelessWidget {
   const ChatTile({
     Key? key,
     required this.chatName,
-    required this.index,
+    required this.id,
   }) : super(key: key);
   final String chatName;
-  final int index;
+  final String id;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      key: Key('chatTileIndex$index'),
-      leading: const CircleAvatar(backgroundColor: Colors.cyan),
+      key: Key('chatTileIndex$id'),
+      leading: const CircleAvatar(
+        radius: 20,
+        backgroundColor: Colors.cyan,
+      ),
       title: Text(chatName),
       onTap: () => Navigator.restorablePushNamed(
         context,
         ChatView.routeName,
-        arguments: index,
+        arguments: id,
       ),
     );
   }
@@ -74,7 +77,7 @@ class MessagerView extends StatelessWidget {
                                 //   arguments: id,
                                 // );
                               },
-                              child: const CircleAvatar(radius: 26),
+                              child: const CircleAvatar(radius: 20),
                             ),
                           ],
                         );
@@ -106,12 +109,17 @@ class MessagerView extends StatelessWidget {
                 child: Consumer<MessagerController>(
                   builder: (_, controller, __) {
                     var chats = controller.getChats();
-                    return controller.getChats().isNotEmpty
+                    return (controller.getChats().isNotEmpty &&
+                            controller.getUserModel()!.chatIds.isNotEmpty)
                         ? ListView.builder(
                             itemCount: chats.length,
-                            itemBuilder: (context, index) => ChatTile(
-                                chatName: chats.keys.toList()[index],
-                                index: index),
+                            itemBuilder: (context, index) {
+                              var id = chats.keys.toList()[index];
+                              return ChatTile(
+                                  chatName:
+                                      controller.getUserModel()!.chatIds[id],
+                                  id: id);
+                            },
                           )
                         : const Center(
                             child: Text('You dont have anyone to chat with.'));
